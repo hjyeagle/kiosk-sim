@@ -5,20 +5,22 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>키오스크 연습 - 시니어 AI 따라하기</title>
 <style>
-:root{--bg:#f4f1ea;--ink:#1f2937;--accent:#e85d04;--ok:#15803d;--hl:#ffb703;--card:#ffffff}
+:root{--bg:#f4f1ea;--ink:#1f2937;--accent:#e85d04;--ok:#15803d;--hl:#ffb703}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",sans-serif}
-.app{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-areas:"head head" "kiosk guide";gap:16px 28px;padding:14px 28px;min-height:100vh;align-content:start}
-header{grid-area:head;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
-header h1{margin:0;font-size:clamp(20px,2.6vh,30px)}
-.modes button{font:inherit;font-size:clamp(15px,2vh,20px);padding:.5em 1.1em;border:2px solid var(--accent);background:#fff;color:var(--accent);border-radius:2em;cursor:pointer;font-weight:700}
+.app{display:flex;flex-direction:column;align-items:center;padding:10px 12px 24px}
+header{width:100%;max-width:640px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin-bottom:8px}
+header h1{margin:0;font-size:clamp(17px,2.4vh,26px)}
+header h1 small{font-size:.6em;font-weight:400;color:#555}
+.modes button{font:inherit;font-size:clamp(13px,1.8vh,17px);padding:.35em .9em;border:2px solid var(--accent);background:#fff;color:var(--accent);border-radius:2em;cursor:pointer;font-weight:700}
 .modes button.on{background:var(--accent);color:#fff}
 
-/* kiosk-sim */
-.kwrap{grid-area:kiosk;position:relative}
-.kiosk{font-size:clamp(10px,min(1.75vh,3.5vw),19px);width:26em;background:#2b2f3a;border-radius:1.2em;padding:1em;box-shadow:0 .6em 1.6em rgba(0,0,0,.25)}
+/* 키오스크 열: 키오스크 + 하단 안내 */
+.kcol{font-size:clamp(11px,min(1.75vh,3.3vw),21px);width:28em;max-width:100%}
+.kiosk{width:100%;background:#2b2f3a;border-radius:1.2em;padding:1em;box-shadow:0 .6em 1.6em rgba(0,0,0,.25)}
 .kiosk.watch{pointer-events:none}
-.screen{background:#fffdf7;border-radius:.6em;height:34em;position:relative;overflow:hidden;display:flex;flex-direction:column}
+.screen{background:#fffdf7;border-radius:.6em;height:31em;position:relative;overflow:hidden}
+#screen{display:flex;flex-direction:column;height:100%}
 .topbar{background:var(--accent);color:#fff;padding:.6em 1em;font-weight:700;font-size:1.1em;display:flex;justify-content:space-between}
 .sbody{flex:1;padding:1em;overflow:auto;display:flex;flex-direction:column;gap:.8em}
 .center{align-items:center;justify-content:center;text-align:center;cursor:pointer}
@@ -42,6 +44,7 @@ header h1{margin:0;font-size:clamp(20px,2.6vh,30px)}
 .modal{position:absolute;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:1em}
 .mbox{background:#fff;border-radius:.8em;padding:1em;width:100%;display:flex;flex-direction:column;gap:.6em}
 .mbox h3{margin:0;font-size:1.25em}
+.mbox .sub{font-size:.85em;color:#666}
 .opts{display:flex;gap:.4em}
 .opts .btn{flex:1;padding:.55em .2em;font-size:1em}
 .opts .btn.on{background:#fff3e0;border-color:var(--accent);color:var(--accent)}
@@ -51,15 +54,13 @@ header h1{margin:0;font-size:clamp(20px,2.6vh,30px)}
 .total{display:flex;justify-content:space-between;font-weight:700;font-size:1.2em;border-top:.1em solid #ddd;padding-top:.5em}
 .msg{font-size:1.35em;font-weight:700;text-align:center;line-height:1.5}
 .deck{display:flex;gap:1em;margin-top:1em;align-items:flex-start}
-.slotbox{flex:1;color:#cbd5e1;text-align:center;font-size:.9em}
-.slot{height:2.4em;background:#0d0f14;border-radius:.3em;margin-top:.3em;position:relative;border:.15em solid #444}
-.cardpic{position:absolute;left:12%;right:12%;top:-1.9em;height:3em;background:linear-gradient(135deg,#3b82f6,#1e3a8a);border-radius:.3em;transition:top .8s;opacity:.0}
+.slotbox,.tkbox{flex:1;color:#cbd5e1;text-align:center;font-size:.9em}
+.slot,.tkslot{height:2.4em;background:#0d0f14;border-radius:.3em;margin-top:.3em;position:relative;border:.15em solid #444}
+.cardpic{position:absolute;left:12%;right:12%;top:-1.9em;height:3em;background:linear-gradient(135deg,#3b82f6,#1e3a8a);border-radius:.3em;transition:top .8s;opacity:0}
 .cardpic.in{opacity:1;top:-.4em}
-.tkbox{flex:1;color:#cbd5e1;text-align:center;font-size:.9em}
-.tkslot{height:2.4em;background:#0d0f14;border-radius:.3em;margin-top:.3em;position:relative;border:.15em solid #444}
 .ticket{position:absolute;left:18%;right:18%;top:.5em;background:#fff;color:#222;border-radius:.2em;padding:.5em .3em;font-weight:700;box-shadow:0 .2em .5em rgba(0,0,0,.4);cursor:pointer;animation:out .9s ease-out forwards;z-index:3}
 @keyframes out{from{top:-1em;opacity:.2}to{top:1.1em;opacity:1}}
-.toast{position:absolute;left:1em;right:1em;bottom:5.2em;background:#111;color:#fff;border-radius:.6em;padding:.6em .8em;text-align:center;font-size:1em;opacity:0;transition:opacity .3s;pointer-events:none;z-index:20}
+.toast{position:absolute;left:1em;right:1em;bottom:1em;background:#111;color:#fff;border-radius:.6em;padding:.6em .8em;text-align:center;opacity:0;transition:opacity .3s;pointer-events:none;z-index:20}
 .toast.show{opacity:.92}
 .hl{outline:.22em solid var(--hl)!important;box-shadow:0 0 0 .5em rgba(255,183,3,.38)!important;animation:pulse 1s infinite;position:relative;z-index:2}
 @keyframes pulse{50%{box-shadow:0 0 0 .9em rgba(255,183,3,.12)}}
@@ -67,45 +68,40 @@ header h1{margin:0;font-size:clamp(20px,2.6vh,30px)}
 @keyframes rip{to{transform:scale(2.4);opacity:0}}
 #finger{position:fixed;left:0;top:0;font-size:56px;line-height:1;pointer-events:none;z-index:50;display:none;filter:drop-shadow(0 4px 4px rgba(0,0,0,.4));transition:transform var(--ft,1s) ease}
 
-/* guide */
-.guide{grid-area:guide;background:var(--card);border-radius:1em;padding:clamp(14px,2.4vh,28px);box-shadow:0 .2em 1em rgba(0,0,0,.08);align-self:start}
-.stepno{display:inline-block;background:var(--accent);color:#fff;font-weight:700;border-radius:2em;padding:.2em .9em;font-size:clamp(16px,2.2vh,24px)}
-.guide h2{font-size:clamp(22px,3.7vh,40px);line-height:1.5;margin:.5em 0}
-.warn{background:#fff8db;border-left:.4em solid var(--hl);padding:.6em 1em;border-radius:.4em;font-size:clamp(17px,2.5vh,28px);line-height:1.6}
-.warn b{display:block;margin-bottom:.2em}
-.warn p{margin:0}
-.status{margin:.8em 0;min-height:2.2em;font-size:clamp(18px,2.6vh,28px);font-weight:700;color:var(--accent)}
-.status.ok{color:var(--ok)}
-.ctrls{display:flex;flex-wrap:wrap;gap:.6em;align-items:center}
-.ctrls button,.ctrls select{font:inherit;font-size:clamp(16px,2.1vh,22px);padding:.5em 1em;border-radius:.6em;border:2px solid #999;background:#fff;cursor:pointer;font-weight:700}
-.ctrls .go{background:var(--ok);border-color:var(--ok);color:#fff}
-.ctrls .glow{animation:pulse2 1s infinite}
-@keyframes pulse2{50%{box-shadow:0 0 0 .5em rgba(21,128,61,.45);transform:scale(1.08)}}
-.dots{display:flex;gap:.4em;margin:.8em 0}
-.dots i{width:2.2em;height:.55em;background:#ddd;border-radius:1em}
+/* 하단 안내 */
+.guide{margin-top:.8em;background:#fff;border-radius:.9em;padding:.9em 1em;box-shadow:0 .2em .8em rgba(0,0,0,.08)}
+.grow{display:flex;align-items:center;gap:.6em;flex-wrap:wrap}
+.stepno{background:var(--accent);color:#fff;font-weight:700;border-radius:2em;padding:.15em .8em;font-size:1em}
+.dots{display:flex;gap:.25em;flex:1;min-width:6em}
+.dots i{flex:1;height:.45em;background:#ddd;border-radius:1em}
 .dots i.on{background:var(--accent)}
 .dots i.past{background:var(--ok)}
-.note{font-size:clamp(13px,1.7vh,17px);color:#555;margin-top:1em;line-height:1.6}
-@media(max-width:820px){
-  .app{grid-template-columns:1fr;grid-template-areas:"head" "guide" "kiosk";padding:12px 14px}
-  .kwrap{display:flex;justify-content:center}
-}
+.gt{font-size:1.2em;font-weight:700;line-height:1.5;margin:.5em 0 .4em}
+.warn{background:#fff8db;border-left:.3em solid var(--hl);padding:.4em .7em;border-radius:.3em;font-size:.95em;line-height:1.55}
+.status{margin:.5em 0 0;font-size:1.05em;font-weight:700;color:var(--accent)}
+.status.ok{color:var(--ok)}
+.ctrls{display:flex;flex-wrap:wrap;gap:.4em;align-items:center;margin-top:.6em}
+.ctrls button,.ctrls select{font:inherit;font-size:.85em;padding:.35em .8em;border-radius:.5em;border:1.5px solid #999;background:#fff;cursor:pointer}
+.ctrls .go{background:var(--ok);border-color:var(--ok);color:#fff;font-weight:700}
+.ctrls .glow{animation:pulse2 1s infinite;font-size:1.05em}
+@keyframes pulse2{50%{box-shadow:0 0 0 .4em rgba(21,128,61,.4)}}
+.note{font-size:.75em;color:#666;margin:.6em 0 0;line-height:1.5}
 </style>
 </head>
 <body>
 <div class="app">
 <header>
-  <h1>🍜 키오스크 연습실 <small style="font-size:.6em;font-weight:400">시니어 AI 따라하기 6편</small></h1>
+  <h1>🍜 키오스크 연습실 <small>시니어 AI 따라하기 6편</small></h1>
   <div class="modes">
     <button id="mWatch">👀 따라보기</button>
     <button id="mTry" class="on">👆 직접 해보기</button>
   </div>
 </header>
 
-<div class="kwrap">
+<div class="kcol">
   <div class="kiosk" id="kiosk">
     <div class="screen">
-      <div id="screen" style="display:flex;flex-direction:column;height:100%"></div>
+      <div id="screen"></div>
       <div class="toast" id="toast"></div>
     </div>
     <div class="deck">
@@ -113,24 +109,23 @@ header h1{margin:0;font-size:clamp(20px,2.6vh,30px)}
       <div class="tkbox">번호표 출력구<div class="tkslot" id="tkslot"></div></div>
     </div>
   </div>
-</div>
 
-<section class="guide">
-  <span class="stepno" id="sn"></span>
-  <h2 id="gt"></h2>
-  <div class="warn"><b>⚠ 헷갈리는 점</b><p id="gc"></p></div>
-  <div class="status" id="status"></div>
-  <div class="dots" id="dots"></div>
-  <div class="ctrls">
-    <button id="bPrev">◀ 이전</button>
-    <button id="bPlay" class="go" style="display:none">▶ 재생</button>
-    <button id="bRedo">↻ 이 단계 다시</button>
-    <button id="bNext" class="go">다음 ▶</button>
-    <select id="sSpeed" title="재생 속도"><option value="1">속도: 보통</option><option value="1.6">속도: 느리게</option></select>
-    <label style="font-size:clamp(15px,2vh,20px)"><input type="checkbox" id="cTts"> 🔊 읽어주기</label>
-  </div>
-  <p class="note">※ 이 화면은 연습용 가상 키오스크입니다. 실제 키오스크는 가게마다 화면이 조금씩 다릅니다. 순서와 마음가짐은 같으니, 화면이 다르면 AI에게 다시 물어보세요.</p>
-</section>
+  <section class="guide">
+    <div class="grow"><span class="stepno" id="sn"></span><div class="dots" id="dots"></div></div>
+    <div class="gt" id="gt"></div>
+    <div class="warn"><b>⚠ 헷갈리는 점</b> <span id="gc"></span></div>
+    <div class="status" id="status"></div>
+    <div class="ctrls">
+      <button id="bPrev">◀ 이전</button>
+      <button id="bPlay" class="go" style="display:none">▶ 재생</button>
+      <button id="bRedo">↻ 다시</button>
+      <button id="bNext">건너뛰기 ▶</button>
+      <select id="sSpeed" title="재생 속도"><option value="1">속도 보통</option><option value="1.6">속도 느리게</option></select>
+      <label><input type="checkbox" id="cTts"> 🔊 읽어주기</label>
+    </div>
+    <p class="note">※ 연습용 가상 키오스크입니다. 실제 키오스크는 가게마다 화면이 조금씩 다릅니다. 화면이 다르면 AI에게 다시 물어보세요.</p>
+  </section>
+</div>
 </div>
 <div id="finger">👆</div>
 
@@ -141,12 +136,14 @@ const MENU={식사:[['김밥','🍙',4000],['라면','🍜',5000],['떡볶이','
  사이드:[['튀김','🍤',3000],['어묵','🍡',2500],['만두','🥟',3500],['순대','🌭',4000]],
  음료:[['콜라','🥤',2000],['사이다','🧃',2000],['식혜','🍵',2500],['물','💧',1000]]};
 let S,T=null,mode='try',idx=0,ti=0,done=false,run=0,playing=false,speed=1;
+const LAST=7;
 
 function menuItem(n){for(const k in MENU){const m=MENU[k].find(x=>x[0]===n);if(m)return {name:m[0],emoji:m[1],price:m[2]}}return {name:'김밥',emoji:'🍙',price:4000}}
 function reset(){S={item:menuItem('김밥'),screen:'start',type:null,tab:'식사',modal:false,spicy:null,cheese:false,cart:[],cardIn:false};clearTimeout(T)}
-function withCart(){S.cart=[{name:'김밥',emoji:'🍙',price:4000,qty:1,opt:'보통맛'}]}
+function withCart(){S.cart=[{name:'김밥',emoji:'🍙',price:4000,qty:1,opt:'기본'}]}
 const total=()=>S.cart.reduce((a,c)=>a+c.price*c.qty,0);
 
+/* 각 단계는 목표를 모두 마치면 자동으로 다음 단계로 넘어갑니다 */
 const STEPS=[
  {t:'키오스크 화면을 손가락으로 한 번 가볍게 눌러 주문을 시작해 주세요.',
   c:'화면은 세게 누를 필요 없이 살짝 한 번만 누르면 됩니다. 여러 번 누르면 다른 버튼이 눌릴 수 있습니다.',
@@ -157,14 +154,14 @@ const STEPS=[
  {t:'화면에서 먹고 싶은 메뉴 사진을 눌러 주세요.',
   c:'메뉴가 여러 종류로 나뉘어 있으면 화면 위쪽(또는 옆)의 분류 탭(예: 식사, 사이드, 음료)을 눌러야 다른 메뉴가 보입니다. 원하는 메뉴가 안 보이면 이 탭부터 확인해 보세요.',
   tg:['m-김밥'],setup(){reset();S.screen='menu';S.type='먹고 가기'}},
- {t:'메뉴를 누르면 나오는 옵션 창(예: 맵기, 사이즈, 추가 토핑)에서 원하는 항목을 고른 뒤 담기(또는 선택 완료) 버튼을 눌러 주세요.',
+ {t:'메뉴를 누르면 나오는 옵션 창이 보입니다. 옵션은 고르지 않아도 되고, 담기(또는 선택 완료) 버튼을 눌러 주세요.',
   c:'옵션을 고르지 않고 넘어가면 기본값으로 주문됩니다. 또한 담기를 누르기 전에는 장바구니에 들어가지 않으니, 버튼을 꼭 눌러야 합니다.',
-  tg:['opt-보통맛','addcart'],setup(){reset();S.screen='menu';S.type='먹고 가기';S.modal=true}},
- {t:'화면 아래쪽의 주문 내역(장바구니)을 눌러, 고른 메뉴와 수량이 맞는지 확인해 주세요.',
-  c:'수량이 틀렸다면 메뉴 옆의 + / - 버튼으로 고치고, 잘못 담은 메뉴는 삭제(또는 X) 버튼으로 뺄 수 있습니다. 결제 전에 꼭 이 화면에서 확인해야 합니다.',
-  tg:['cartbar','cartlist'],setup(){reset();S.screen='menu';S.type='먹고 가기';withCart()}},
- {t:'주문 내역이 맞으면 결제하기(또는 주문하기) 버튼을 눌러 주세요.',
-  c:'결제 방법 선택 화면(카드, 간편결제 등)이 나오면 평소 쓰시는 방법을 하나만 골라 누르시면 됩니다. 이 단계에서 아직 돈이 나가는 것은 아니니 당황하지 않으셔도 됩니다.',
+  tg:['addcart'],setup(){reset();S.screen='menu';S.type='먹고 가기';S.modal=true}},
+ {t:'화면 아래쪽의 주문 내역(장바구니)을 눌러 주세요.',
+  c:'장바구니에 담아도 바로 결제되는 것이 아닙니다. 주문 내역을 눌러야 고른 메뉴와 수량을 확인하는 화면으로 넘어갑니다. 메뉴를 더 담고 싶으면 메뉴를 한 번 더 누르세요.',
+  tg:['cartbar'],setup(){reset();S.screen='menu';S.type='먹고 가기';withCart()}},
+ {t:'메뉴와 수량이 맞는지 확인하고, 맞으면 결제하기를 누른 뒤 결제 방법에서 카드를 골라 주세요.',
+  c:'수량이 틀렸다면 메뉴 옆의 + / - 버튼으로 고치고, 잘못 담은 메뉴는 X 버튼으로 뺄 수 있습니다. 결제 방법을 고르는 단계에서는 아직 돈이 나가는 것이 아니니 당황하지 않으셔도 됩니다.',
   tg:['pay','card'],setup(){reset();S.screen='cart';S.type='먹고 가기';withCart()}},
  {t:'화면 안내에 따라 카드를 투입구에 끝까지 꽂아 주세요. (간편결제를 고르셨다면 QR코드나 바코드를 화면 아래 인식부에 대 주세요.)',
   c:'카드는 IC칩이 있는 면을 위로(또는 안내 그림 방향으로) 넣어야 하며, 결제가 끝날 때까지 뽑지 말고 그대로 두셔야 합니다. "카드를 빼 주세요"라는 안내가 나올 때 뽑으시면 됩니다.',
@@ -174,7 +171,7 @@ const STEPS=[
   tg:['ticket'],setup(){reset();S.screen='ticket';S.type='먹고 가기';withCart()}}
 ];
 
-/* '다음'으로 넘어갈 때는 고객이 직접 담은 주문을 지우지 않고 이어서 진행 */
+/* '건너뛰기'로 넘어갈 때는 담은 주문을 지우지 않고 이어서 진행 */
 const SOFT=[
  ()=>reset(),
  ()=>{S.screen='type';S.modal=false},
@@ -185,15 +182,14 @@ const SOFT=[
  ()=>{S.screen='cardwait';S.cardIn=false;clearTimeout(T)},
  ()=>{S.screen='ticket';S.cardIn=false;clearTimeout(T)}
 ];
+
 const ACT={
  start(){S.screen='type'},
  dine(){S.type='먹고 가기';S.screen='menu'},
  take(){S.type='포장';S.screen='menu'},
  'm-김밥'(){S.modal=true},
- 'opt-보통맛'(){S.spicy='보통맛'},
  addcart(){S.cart.push({name:S.item.name,emoji:S.item.emoji,price:S.item.price+(S.cheese?500:0),qty:1,opt:(S.spicy||'기본')+(S.cheese?' · 치즈':'')});S.modal=false;S.spicy=null;S.cheese=false},
  cartbar(){S.screen='cart'},
- cartlist(){},
  pay(){S.screen='pay'},
  card(){S.screen='cardwait'},
  slot(){S.cardIn=true;S.screen='processing';clearTimeout(T);T=setTimeout(()=>{S.screen='remove';update()},2400)},
@@ -206,6 +202,7 @@ function freeAct(id){
   if(id==='opt-cheese'){S.cheese=!S.cheese;return true}
   if(id==='cancel'){S.modal=false;return true}
   if(id==='addcart'&&S.modal){ACT.addcart();return true}
+  if(id==='cartbar'){S.screen='cart';return true}
   let m;
   if(m=id.match(/^qty\+(\d+)$/)){const c=S.cart[+m[1]];if(c)c.qty++;return true}
   if(m=id.match(/^qty-(\d+)$/)){const c=S.cart[+m[1]];if(c&&c.qty>1)c.qty--;return true}
@@ -220,9 +217,9 @@ function render(){
   let h='';
   switch(S.screen){
   case 'start':
-    h=bar('')+`<div class="sbody center" data-t="start"><div class="big">🍜</div><h2>주문하시려면<br>화면을 가볍게<br>눌러 주세요</h2><div class="btn primary xl">주문 시작</div></div>`;break;
+    h=bar('')+`<div class="sbody center" data-t="start"><div class="big">🍜</div><h2>주문하시려면<br>아래 버튼을 눌러 주세요</h2><div class="btn primary xl">주문 시작</div></div>`;break;
   case 'type':
-    h=bar('1/4 식사 방법')+`<div class="sbody"><div class="msg">식사 방법을 골라 주세요</div><div class="row2"><button class="btn typebtn" data-t="dine">🍽<br>먹고 가기</button><button class="btn typebtn" data-t="take">🛍<br>포장하기</button></div></div>`;break;
+    h=bar('식사 방법')+`<div class="sbody"><div class="msg">식사 방법을 골라 주세요</div><div class="row2"><button class="btn typebtn" data-t="dine">🍽<br>먹고 가기</button><button class="btn typebtn" data-t="take">🛍<br>포장하기</button></div></div>`;break;
   case 'menu': {
     const tabs=Object.keys(MENU).map(k=>`<button class="btn ${S.tab===k?'on':''}" data-t="tab-${k}">${k}</button>`).join('');
     const items=MENU[S.tab].map(m=>`<button class="mi" data-t="m-${m[0]}"><span class="em">${m[1]}</span><b>${m[0]}</b><small>${won(m[2])}</small></button>`).join('');
@@ -231,12 +228,12 @@ function render(){
     h=bar(S.type||'')+`<div class="sbody"><div class="tabs">${tabs}</div><div class="menu">${items}</div></div>${cb}`;
     if(S.modal){
       const o=x=>`<button class="btn ${S.spicy===x?'on':''}" data-t="opt-${x}">${x}</button>`;
-      h+=`<div class="modal"><div class="mbox"><h3>${S.item.emoji} ${S.item.name} 옵션</h3><div>맵기</div><div class="opts">${o('순한맛')}${o('보통맛')}${o('매운맛')}</div><div>추가 토핑</div><div class="opts"><button class="btn ${S.cheese?'on':''}" data-t="opt-cheese">치즈 +500원</button></div><div class="row2"><button class="btn" data-t="cancel">취소</button><button class="btn primary" data-t="addcart">담기</button></div></div></div>`;
+      h+=`<div class="modal"><div class="mbox"><h3>${S.item.emoji} ${S.item.name} · ${won(S.item.price)}</h3><div class="sub">옵션은 고르지 않아도 됩니다 (선택 사항)</div><div>맵기</div><div class="opts">${o('순한맛')}${o('보통맛')}${o('매운맛')}</div><div>추가 토핑</div><div class="opts"><button class="btn ${S.cheese?'on':''}" data-t="opt-cheese">치즈 +500원</button></div><div class="row2"><button class="btn" data-t="cancel">취소</button><button class="btn primary" data-t="addcart">담기</button></div></div></div>`;
     }
     break;}
   case 'cart': {
     const rows=S.cart.map((c,i)=>`<div class="crow"><span>${c.emoji} ${c.name}<br><small>(${c.opt})</small></span><span class="qty"><button data-t="qty-${i}">−</button> ${c.qty} <button data-t="qty+${i}">+</button></span><span>${won(c.price*c.qty)}</span><button class="btn" style="padding:.2em .6em" data-t="del${i}">✕</button></div>`).join('')||'<div class="msg">비어 있어요</div>';
-    h=bar('주문 내역')+`<div class="sbody"><div class="list" data-t="cartlist">${rows}<div class="total"><span>합계</span><span>${won(total())}</span></div></div><div class="row2" style="margin-top:auto"><button class="btn" data-t="more">더 담기</button><button class="btn primary" data-t="pay">결제하기</button></div></div>`;break;}
+    h=bar('주문 내역')+`<div class="sbody"><div class="list">${rows}<div class="total"><span>합계</span><span>${won(total())}</span></div></div><div class="row2" style="margin-top:auto"><button class="btn" data-t="more">더 담기</button><button class="btn primary" data-t="pay">결제하기</button></div></div>`;break;}
   case 'pay':
     h=bar('결제 방법')+`<div class="sbody"><div class="msg">결제 방법을 골라 주세요</div><button class="btn typebtn" data-t="card">💳 카드 결제</button><button class="btn typebtn" data-t="qr">📱 간편결제(QR)</button></div>`;break;
   case 'cardwait':
@@ -263,19 +260,20 @@ function update(){render();guideStatus()}
 function highlight(){
   document.querySelectorAll('.hl').forEach(e=>e.classList.remove('hl'));
   if(done)return;
-  const el=findEl(curTarget());
+  const c=curTarget(),el=findEl(c);
   if(el)el.classList.add('hl');
-  if(curTarget()==='dine'){const t=findEl('take');if(t)t.classList.add('hl')}
-  if(curTarget()==='m-김밥')document.querySelectorAll('.mi').forEach(e=>e.classList.add('hl'));
+  if(c==='dine'){const t=findEl('take');if(t)t.classList.add('hl')}
+  if(c==='m-김밥')document.querySelectorAll('.mi').forEach(e=>e.classList.add('hl'));
 }
 function findEl(id){return document.querySelector(`[data-t="${id}"]`)}
 
-function runTarget(){
-  ACT[curTarget()]();
+function finishTarget(){
   ti++;
   if(ti>=STEPS[idx].tg.length)done=true;
+  if(done&&mode==='try'&&idx<LAST){gotoStep(idx+1,true);return}   // 자동으로 다음 단계
   update();
 }
+function runTarget(){ACT[curTarget()]();finishTarget()}
 function hint(msg){
   const t=$('#toast');t.textContent=msg||'반짝이는 곳을 눌러 보세요 ✨';t.classList.add('show');
   clearTimeout(hint.h);hint.h=setTimeout(()=>t.classList.remove('show'),1800);
@@ -283,42 +281,36 @@ function hint(msg){
 $('#kiosk').addEventListener('click',e=>{
   if(mode!=='try')return;
   const el=e.target.closest('[data-t]');if(!el)return;
-  const id=el.getAttribute('data-t');
-  if(!done&&id===curTarget()){runTarget();return}
-  if(!done&&id==='addcart'&&idx===3){ACT.addcart();ti=STEPS[idx].tg.length;done=true;update();return}
-  if(id.startsWith('m-')&&!S.modal&&S.screen==='menu'&&(idx===2||idx===3)){
-    S.item=menuItem(id.slice(2));
-    if(!done&&curTarget()==='m-김밥'){ACT['m-김밥']();ti++;if(ti>=STEPS[idx].tg.length)done=true}
-    else S.modal=true;
-    update();return;
+  const id=el.getAttribute('data-t'),cur=curTarget();
+  if(!done){
+    if(id===cur){runTarget();return}
+    if(cur==='dine'&&id==='take'){ACT.take();finishTarget();return}
+    if(cur==='m-김밥'&&id.startsWith('m-')){S.item=menuItem(id.slice(2));ACT['m-김밥']();finishTarget();return}
   }
-  if(!done&&id==='take'&&curTarget()==='dine'){ACT.take();ti++;if(ti>=STEPS[idx].tg.length)done=true;update();return}
+  if(id.startsWith('m-')&&!S.modal&&S.screen==='menu'&&idx>=2&&idx<=4){S.item=menuItem(id.slice(2));S.modal=true;update();return}
   if(freeAct(id)){update();return}
-  hint(done?'잘하셨어요! 오른쪽 "다음"을 눌러 주세요 👉':null);
+  hint(done?'모두 끝났어요! 아래 "처음부터"를 눌러 다시 연습해 보세요.':null);
 });
 
 function guideStatus(){
-  const s=$('#status');
-  if(mode==='watch'){s.className='status';s.textContent=playing?'▶ 재생 중… 천천히 따라 보세요':'▶ 재생 버튼을 누르면 자동으로 보여 드립니다';return}
-  if(done){
-    s.className='status ok';
-    s.textContent=idx===STEPS.length-1?'🎉 키오스크 주문이 모두 끝났어요! 정말 잘하셨어요.':'👏 잘했어요! 초록색 "다음"을 눌러 주세요.';
+  const s=$('#status'),nx=$('#bNext');
+  if(mode==='watch'){s.className='status';s.textContent=playing?'▶ 재생 중… 천천히 따라 보세요':'▶ 재생 버튼을 누르면 자동으로 보여 드립니다';nx.textContent='건너뛰기 ▶';nx.classList.remove('go','glow');return}
+  if(done&&idx===LAST){
+    s.className='status ok';s.textContent='🎉 키오스크 주문이 모두 끝났어요! 정말 잘하셨어요.';
+    nx.textContent='↺ 처음부터';nx.classList.add('go','glow');
   }else{
-    s.className='status';
-    s.innerHTML='👉 초록색 "다음"을 눌러 주세요<small style="display:block;font-weight:400;color:#666;font-size:.7em;margin-top:.3em">키오스크 화면의 반짝이는 곳을 눌러 연습해 보셔도 좋아요.</small>';
+    s.className='status';s.textContent='👆 화면의 반짝이는 곳을 눌러 보세요';
+    nx.textContent='건너뛰기 ▶';nx.classList.remove('go','glow');
   }
-  $('#bNext').classList.add('glow');
-  $('#bNext').textContent=(idx===STEPS.length-1&&done)?'↺ 처음부터':'다음 ▶';
 }
 function gotoStep(i,soft){
-  idx=Math.max(0,Math.min(STEPS.length-1,i));ti=0;done=false;
+  idx=Math.max(0,Math.min(LAST,i));ti=0;done=false;
   clearTimeout(T);
   if(soft)SOFT[idx]();else STEPS[idx].setup();
   $('#sn').textContent=`${idx+1}단계 / ${STEPS.length}`;
   $('#gt').textContent=STEPS[idx].t;
   $('#gc').textContent=STEPS[idx].c;
   $('#dots').innerHTML=STEPS.map((_,k)=>`<i class="${k===idx?'on':k<idx?'past':''}"></i>`).join('');
-  $('#bNext').classList.remove('glow');
   update();
   if($('#cTts').checked)speak(`${idx+1}단계. ${STEPS[idx].t} 헷갈리는 점. ${STEPS[idx].c}`);
 }
@@ -326,7 +318,7 @@ function speak(txt){
   try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(txt);u.lang='ko-KR';u.rate=.85;speechSynthesis.speak(u)}catch(e){}
 }
 
-/* 자동 재생 */
+/* 자동 재생 (따라보기) */
 const sleep=ms=>new Promise(r=>setTimeout(r,ms*speed));
 async function waitEl(id,my){
   for(let k=0;k<80;k++){if(my!==run)return null;const el=findEl(id);if(el)return el;await new Promise(r=>setTimeout(r,100))}
@@ -346,7 +338,7 @@ function ripple(el){
 async function autoPlay(from){
   const my=++run;playing=true;setPlayBtn();
   $('#finger').style.display='block';$('#finger').style.transform='translate(60vw,100vh)';
-  for(let i=from;i<STEPS.length;i++){
+  for(let i=from;i<=LAST;i++){
     if(my!==run)return;
     gotoStep(i);guideStatus();
     await sleep(4200);
@@ -366,7 +358,6 @@ async function autoPlay(from){
 function stopPlay(){run++;playing=false;setPlayBtn();$('#finger').style.display='none'}
 function setPlayBtn(){$('#bPlay').textContent=playing?'⏸ 멈춤':'▶ 재생'}
 
-/* 컨트롤 */
 function setMode(m){
   mode=m;stopPlay();
   $('#kiosk').classList.toggle('watch',m==='watch');
@@ -379,12 +370,11 @@ $('#mWatch').onclick=()=>setMode('watch');
 $('#mTry').onclick=()=>setMode('try');
 $('#bPrev').onclick=()=>{stopPlay();gotoStep(idx-1)};
 $('#bRedo').onclick=()=>{stopPlay();gotoStep(idx)};
-$('#bNext').onclick=()=>{stopPlay();if(idx===STEPS.length-1&&done)gotoStep(0);else gotoStep(idx+1,true)};
+$('#bNext').onclick=()=>{stopPlay();if(idx===LAST&&done)gotoStep(0);else gotoStep(idx+1,true)};
 $('#bPlay').onclick=()=>{if(playing)stopPlay();else autoPlay(idx)};
 $('#sSpeed').onchange=e=>{speed=parseFloat(e.target.value)};
-window.addEventListener('resize',()=>{if(playing){const el=findEl(curTarget());}});
 
-/* 주소 옵션: ?mode=watch&autoplay=1&speed=1.6&tts=1 */
+/* 주소 옵션: ?mode=watch&autoplay=1&speed=1.6 */
 const q=new URLSearchParams(location.search);
 if(q.get('speed')){speed=parseFloat(q.get('speed'))||1;$('#sSpeed').value=speed>1?'1.6':'1'}
 if(q.get('tts')==='1')$('#cTts').checked=true;
