@@ -3,384 +3,233 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>키오스크 연습 - 시니어 AI 따라하기</title>
+<title>AI 대화 연습실 - 시니어 AI 따라하기 5편</title>
 <style>
-:root{--bg:#f4f1ea;--ink:#1f2937;--accent:#e85d04;--ok:#15803d;--hl:#ffb703}
+:root{--o:#e65c00;--o2:#fff1e6;--ink:#222;--bg:#f6f1ea;--g:#2e7d32;--y:#fff3b0;--b:#1f2430}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",sans-serif}
-.app{display:flex;flex-direction:column;align-items:center;padding:10px 12px 24px}
-header{width:100%;max-width:640px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin-bottom:8px}
-header h1{margin:0;font-size:clamp(17px,2.4vh,26px)}
-header h1 small{font-size:.6em;font-weight:400;color:#555}
-.modes button{font:inherit;font-size:clamp(13px,1.8vh,17px);padding:.35em .9em;border:2px solid var(--accent);background:#fff;color:var(--accent);border-radius:2em;cursor:pointer;font-weight:700}
-.modes button.on{background:var(--accent);color:#fff}
-
-/* 키오스크 열: 키오스크 + 하단 안내 */
-.kcol{font-size:clamp(11px,min(1.75vh,3.3vw),21px);width:28em;max-width:100%}
-.kiosk{width:100%;background:#2b2f3a;border-radius:1.2em;padding:1em;box-shadow:0 .6em 1.6em rgba(0,0,0,.25)}
-.kiosk.watch{pointer-events:none}
-.screen{background:#fffdf7;border-radius:.6em;height:31em;position:relative;overflow:hidden}
-#screen{display:flex;flex-direction:column;height:100%}
-.topbar{background:var(--accent);color:#fff;padding:.6em 1em;font-weight:700;font-size:1.1em;display:flex;justify-content:space-between}
-.sbody{flex:1;padding:1em;overflow:auto;display:flex;flex-direction:column;gap:.8em}
-.center{align-items:center;justify-content:center;text-align:center;cursor:pointer}
-.center h2{font-size:1.6em;margin:.2em 0}
-.big{font-size:5em;line-height:1}
-.btn{font:inherit;font-size:1.15em;font-weight:700;border:.12em solid #ddd;background:#fff;border-radius:.6em;padding:.7em 1em;cursor:pointer}
-.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
-.btn.xl{font-size:1.5em;padding:.8em 1.6em}
-.row2{display:grid;grid-template-columns:1fr 1fr;gap:.8em}
-.typebtn{font-size:1.4em;padding:1.6em .4em}
-.tabs{display:flex;gap:.4em}
-.tabs .btn{flex:1;padding:.5em;font-size:1em}
-.tabs .btn.on{background:#fff3e0;border-color:var(--accent);color:var(--accent)}
-.menu{display:grid;grid-template-columns:1fr 1fr;gap:.7em}
-.mi{background:#fff;border:.12em solid #eee;border-radius:.7em;text-align:center;padding:.6em .2em;cursor:pointer;font:inherit}
-.mi .em{font-size:2.6em;display:block}
-.mi b{display:block}
-.mi small{color:#666}
-.cartbar{margin:0 1em 1em;background:#333;color:#fff;padding:.9em 1em;border-radius:.7em;display:flex;justify-content:space-between;font-weight:700;cursor:pointer}
-.cartbar.empty{background:#e5e5e5;color:#777;cursor:default;font-weight:400}
-.modal{position:absolute;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:1em}
-.mbox{background:#fff;border-radius:.8em;padding:1em;width:100%;display:flex;flex-direction:column;gap:.6em}
-.mbox h3{margin:0;font-size:1.25em}
-.mbox .sub{font-size:.85em;color:#666}
-.opts{display:flex;gap:.4em}
-.opts .btn{flex:1;padding:.55em .2em;font-size:1em}
-.opts .btn.on{background:#fff3e0;border-color:var(--accent);color:var(--accent)}
-.list{border:.12em solid #eee;border-radius:.7em;padding:.5em .8em;background:#fff}
-.crow{display:flex;align-items:center;justify-content:space-between;gap:.4em;padding:.5em 0}
-.qty button{font:inherit;width:2em;height:2em;border-radius:50%;border:.1em solid #bbb;background:#fff;cursor:pointer;font-weight:700}
-.total{display:flex;justify-content:space-between;font-weight:700;font-size:1.2em;border-top:.1em solid #ddd;padding-top:.5em}
-.msg{font-size:1.35em;font-weight:700;text-align:center;line-height:1.5}
-.deck{display:flex;gap:1em;margin-top:1em;align-items:flex-start}
-.slotbox,.tkbox{flex:1;color:#cbd5e1;text-align:center;font-size:.9em}
-.slot,.tkslot{height:2.4em;background:#0d0f14;border-radius:.3em;margin-top:.3em;position:relative;border:.15em solid #444}
-.cardpic{position:absolute;left:12%;right:12%;top:-1.9em;height:3em;background:linear-gradient(135deg,#3b82f6,#1e3a8a);border-radius:.3em;transition:top .8s;opacity:0}
-.cardpic.in{opacity:1;top:-.4em}
-.ticket{position:absolute;left:18%;right:18%;top:.5em;background:#fff;color:#222;border-radius:.2em;padding:.5em .3em;font-weight:700;box-shadow:0 .2em .5em rgba(0,0,0,.4);cursor:pointer;animation:out .9s ease-out forwards;z-index:3}
-@keyframes out{from{top:-1em;opacity:.2}to{top:1.1em;opacity:1}}
-.toast{position:absolute;left:1em;right:1em;bottom:1em;background:#111;color:#fff;border-radius:.6em;padding:.6em .8em;text-align:center;opacity:0;transition:opacity .3s;pointer-events:none;z-index:20}
-.toast.show{opacity:.92}
-.hl{outline:.22em solid var(--hl)!important;box-shadow:0 0 0 .5em rgba(255,183,3,.38)!important;animation:pulse 1s infinite;position:relative;z-index:2}
-@keyframes pulse{50%{box-shadow:0 0 0 .9em rgba(255,183,3,.12)}}
-.ripple{position:fixed;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;background:rgba(232,93,4,.45);pointer-events:none;z-index:60;animation:rip .6s ease-out forwards}
-@keyframes rip{to{transform:scale(2.4);opacity:0}}
-#finger{position:fixed;left:0;top:0;font-size:56px;line-height:1;pointer-events:none;z-index:50;display:none;filter:drop-shadow(0 4px 4px rgba(0,0,0,.4));transition:transform var(--ft,1s) ease}
-
-/* 하단 안내 */
-.guide{margin-top:.8em;background:#fff;border-radius:.9em;padding:.9em 1em;box-shadow:0 .2em .8em rgba(0,0,0,.08)}
-.grow{display:flex;align-items:center;gap:.6em;flex-wrap:wrap}
-.stepno{background:var(--accent);color:#fff;font-weight:700;border-radius:2em;padding:.15em .8em;font-size:1em}
-.dots{display:flex;gap:.25em;flex:1;min-width:6em}
-.dots i{flex:1;height:.45em;background:#ddd;border-radius:1em}
-.dots i.on{background:var(--accent)}
-.dots i.past{background:var(--ok)}
-.gt{font-size:1.2em;font-weight:700;line-height:1.5;margin:.5em 0 .4em}
-.warn{background:#fff8db;border-left:.3em solid var(--hl);padding:.4em .7em;border-radius:.3em;font-size:.95em;line-height:1.55}
-.status{margin:.5em 0 0;font-size:1.05em;font-weight:700;color:var(--accent)}
-.status.ok{color:var(--ok)}
-.ctrls{display:flex;flex-wrap:wrap;gap:.4em;align-items:center;margin-top:.6em}
-.ctrls button,.ctrls select{font:inherit;font-size:.85em;padding:.35em .8em;border-radius:.5em;border:1.5px solid #999;background:#fff;cursor:pointer}
-.ctrls .go{background:var(--ok);border-color:var(--ok);color:#fff;font-weight:700}
-.ctrls .glow{animation:pulse2 1s infinite;font-size:1.05em}
-@keyframes pulse2{50%{box-shadow:0 0 0 .4em rgba(21,128,61,.4)}}
-.note{font-size:.75em;color:#666;margin:.6em 0 0;line-height:1.5}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"Malgun Gothic","Apple SD Gothic Neo",system-ui,sans-serif}
+body{font-size:clamp(14px,min(1.9vh,4.2vw),21px);line-height:1.5}
+.col{width:min(100%,28em);margin:0 auto;padding:.6em .6em 2em}
+h1{font-size:1.35em;margin:.2em 0 .1em;display:flex;align-items:baseline;gap:.5em;flex-wrap:wrap}
+h1 small{font-size:.6em;font-weight:400;color:#666}
+.modes{display:flex;gap:.5em;margin:.4em 0 .6em}
+.modes button{flex:1;font:inherit;font-weight:700;padding:.5em;border-radius:2em;border:2px solid var(--o);background:#fff;color:var(--o);cursor:pointer}
+.modes button.on{background:var(--o);color:#fff}
+.phone{background:var(--b);border-radius:1.2em;padding:.5em;box-shadow:0 .4em 1em #0003}
+.top{background:#fff;border-radius:.8em .8em 0 0;padding:.5em .8em;font-weight:700;display:flex;align-items:center;gap:.5em;border-bottom:1px solid #eee}
+.dot{width:.7em;height:.7em;border-radius:50%;background:#4caf50}
+#chat{background:#fbf8f3;height:min(58vh,34em);overflow-y:auto;padding:.7em;scroll-behavior:smooth;position:relative}
+.m{max-width:94%;margin:.5em 0;padding:.6em .8em;border-radius:.9em;font-size:.95em;word-break:keep-all}
+.me{margin-left:auto;background:var(--o);color:#fff;border-bottom-right-radius:.2em}
+.ai{background:#fff;border:1px solid #e6ddd0;border-bottom-left-radius:.2em}
+.ai h4{margin:.7em 0 .25em;font-size:1em}
+.ai h4:first-child{margin-top:0}
+.ai table{border-collapse:collapse;width:100%;font-size:.82em;margin:.3em 0}
+.ai th,.ai td{border:1px solid #ddd;padding:.3em .4em;text-align:left;vertical-align:top}
+.ai th{background:#f3eee6}
+.ai ol,.ai ul{margin:.2em 0;padding-left:1.2em}
+.ai li{margin:.15em 0}
+.typing span{display:inline-block;width:.5em;height:.5em;margin:0 .15em;border-radius:50%;background:#bbb;animation:b 1s infinite}
+.typing span:nth-child(2){animation-delay:.2s}.typing span:nth-child(3){animation-delay:.4s}
+@keyframes b{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-.4em)}}
+.blk{border-radius:.6em;padding:.4em .5em;margin:.4em 0;border:2px solid transparent}
+.blk.hl{border-color:var(--o);background:var(--y);cursor:pointer;animation:pulse 1.2s infinite}
+.blk.hl::before{content:"👆 여기를 눌러 보세요";display:block;background:var(--o);color:#fff;font-weight:700;border-radius:.5em;padding:.2em .6em;margin-bottom:.3em;width:max-content;max-width:100%}
+#hint{background:var(--o);color:#fff;font-weight:700;padding:.5em .8em;font-size:.95em;line-height:1.4}
+#hint:empty{display:none}
+.blk.done{background:#e8f5e9;border-color:#a5d6a7}
+.blk.done::after{content:" ✓ 확인함";color:var(--g);font-weight:700;font-size:.85em}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 #e65c0088}50%{box-shadow:0 0 0 .45em #e65c0000}}
+.bar{background:#fff;border-radius:0 0 .8em .8em;padding:.5em;display:flex;gap:.4em;align-items:flex-end}
+#inp{flex:1;font-size:.82em;min-height:3.4em;max-height:5.2em;overflow:auto;background:#f4f1ec;border-radius:.6em;padding:.4em .6em;color:#555}
+#inp.empty{color:#aaa}
+#send{font:inherit;font-weight:700;background:#bbb;color:#fff;border:0;border-radius:.7em;padding:.7em .9em;cursor:default}
+#send.hl{background:var(--g);cursor:pointer;animation:pulse 1.2s infinite}
+.final{display:block;width:100%;font:inherit;font-weight:700;background:var(--g);color:#fff;border:0;border-radius:.8em;padding:.7em;margin:.5em 0;cursor:pointer;animation:pulse 1.2s infinite}
+.guide{background:#fff;border-radius:1em;padding:.7em .8em;margin-top:.7em;box-shadow:0 .2em .6em #0002}
+.gh{display:flex;align-items:center;gap:.6em}
+.badge{background:var(--o);color:#fff;font-weight:700;border-radius:2em;padding:.15em .7em;white-space:nowrap}
+.prog{flex:1;display:flex;gap:.25em}.prog i{flex:1;height:.45em;border-radius:1em;background:#ddd}.prog i.on{background:var(--o)}
+#gt{font-size:1.1em;font-weight:700;margin:.5em 0}
+#gc{background:#fff8e1;border-left:.3em solid #f5a623;padding:.4em .6em;border-radius:.3em;font-size:.92em}
+.btns{display:flex;gap:.4em;flex-wrap:wrap;margin-top:.6em}
+.btns button,.btns select{font:inherit;font-size:.85em;padding:.35em .7em;border-radius:.6em;border:1px solid #ccc;background:#fafafa;cursor:pointer}
+.note{font-size:.8em;color:#777;margin-top:.5em}
+.links{font-size:.85em;margin-top:.6em}.links a{color:var(--o)}
+.finger{position:fixed;width:2em;height:2em;border-radius:50%;background:#e65c0099;border:2px solid var(--o);pointer-events:none;z-index:9;transition:left .7s ease,top .7s ease;display:none}
+.finger.tap{transform:scale(.7)}
+.copy{background:#f4f1ec;border-radius:.6em;padding:.5em .7em;font-size:.9em;margin:.5em 0}
 </style>
 </head>
 <body>
-<div class="app">
-<header>
-  <h1>🍜 키오스크 연습실 <small>시니어 AI 따라하기 6편</small></h1>
-  <div class="modes">
-    <button id="mWatch">👀 따라보기</button>
-    <button id="mTry" class="on">👆 직접 해보기</button>
-  </div>
-</header>
+<div class="col">
+<h1>💬 AI 대화 연습실 <small>시니어 AI 따라하기 5편 · 일정 정리</small></h1>
+<div class="modes"><button id="mWatch">👀 따라보기</button><button id="mTry" class="on">👆 직접 해보기</button></div>
 
-<div class="kcol">
-  <div class="kiosk" id="kiosk">
-    <div class="screen">
-      <div id="screen"></div>
-      <div class="toast" id="toast"></div>
-    </div>
-    <div class="deck">
-      <div class="slotbox">카드 투입구<div class="slot"><div class="cardpic" id="cardpic"></div><span id="slotHit" style="position:absolute;inset:0"></span></div></div>
-      <div class="tkbox">번호표 출력구<div class="tkslot" id="tkslot"></div></div>
-    </div>
-  </div>
+<div class="phone">
+  <div class="top"><span class="dot"></span>AI 도우미 (연습용)</div>
+  <div id="hint"></div>
+  <div id="chat"></div>
+  <div class="bar"><div id="inp" class="empty">여기에 말하듯 적어서 보냅니다</div><button id="send">보내기</button></div>
+</div>
 
-  <section class="guide">
-    <div class="grow"><span class="stepno" id="sn"></span><div class="dots" id="dots"></div></div>
-    <div class="gt" id="gt"></div>
-    <div class="warn"><b>⚠ 헷갈리는 점</b> <span id="gc"></span></div>
-    <div class="status" id="status"></div>
-    <div class="ctrls">
-      <button id="bPrev">◀ 이전</button>
-      <button id="bPlay" class="go" style="display:none">▶ 재생</button>
-      <button id="bRedo">↻ 다시</button>
-      <button id="bNext">건너뛰기 ▶</button>
-      <select id="sSpeed" title="재생 속도"><option value="1">속도 보통</option><option value="1.6">속도 느리게</option></select>
-      <label><input type="checkbox" id="cTts"> 🔊 읽어주기</label>
-    </div>
-    <p class="note">※ 연습용 가상 키오스크입니다. 실제 키오스크는 가게마다 화면이 조금씩 다릅니다. 화면이 다르면 AI에게 다시 물어보세요.</p>
-    <p class="note"><a href="https://newstoday.co.kr/biznetimes-ai-6/" style="color:#e85d04;font-weight:700">← 뉴스투데이 6편 글로 돌아가기</a> · <a href="https://newstoday.co.kr/" style="color:#555">뉴스투데이 홈</a></p>
-  </section>
+<div class="guide">
+  <div class="gh"><span class="badge" id="gb">1단계 / 6</span><div class="prog" id="gp"></div></div>
+  <div id="gt"></div>
+  <div id="gc"></div>
+  <div class="btns">
+    <button id="bPrev">◀ 이전</button>
+    <button id="bPlay" style="display:none">▶ 재생</button>
+    <button id="bRe">↻ 처음부터</button>
+    <select id="spd"><option value="1">보통 속도</option><option value="1.6">천천히</option></select>
+    <button id="bTts">🔊 읽어주기 끄기</button>
+  </div>
+  <div class="note">※ 연습용 화면입니다. 실제 AI와 연결되어 있지 않고, 같은 대화가 매번 똑같이 나옵니다. 개인정보는 입력하지 않아요.</div>
+  <div class="links"><a href="https://newstoday.co.kr/biznetimes-ai-5/">← 뉴스투데이 5편 글로 돌아가기</a> · <a href="https://newstoday.co.kr/">뉴스투데이 홈</a></div>
 </div>
 </div>
-<div id="finger">👆</div>
+<div class="finger" id="fg"></div>
 
 <script>
-const $=s=>document.querySelector(s);
-const won=n=>n.toLocaleString('ko-KR')+'원';
-const MENU={식사:[['김밥','🍙',4000],['라면','🍜',5000],['떡볶이','🍢',4500],['비빔밥','🍚',7000]],
- 사이드:[['튀김','🍤',3000],['어묵','🍡',2500],['만두','🥟',3500],['순대','🌭',4000]],
- 음료:[['콜라','🥤',2000],['사이다','🧃',2000],['식혜','🍵',2500],['물','💧',1000]]};
-let S,T=null,mode='try',idx=0,ti=0,done=false,run=0,playing=false,speed=1;
-const LAST=7;
+const Q1="다음 주 일정을 정리해 줘. 월요일(19일) 오전 10시에 업무회의가 있고, 화요일(20일) 오후 2시에 거래처 미팅이 있어. 수요일(21일) 오전에는 S병원 건강검진이 있는데 금식이라 9시까지 가야 해. 목요일(22일) 저녁 6시에 동창 모임이 있고, 금요일(23일)에는 지방(부산) 출장이야. 토요일(24일)에는 저녁 5시 가족저녁모임이 예정되어 있어. 모든 일정들을 요일별 표로 정리하고, 겹치거나 무리한 부분이 있으면 알려줘.";
+const Q2="부산출장(23일): 출발 - 23일 오전 7시 비행기, 서울도착 - 24일 오전 9시. 동창모임(22일): 저녁 6시, 다음날 부산출장 일정으로 늦어도 10시까지 귀가 예정. 거래처 미팅(20일): 강남지역으로 교통체증이 심한 곳이라 대중교통 이용 예정.";
+const A1=`<h4>요약</h4>시간이 직접 겹치는 일정은 없습니다. 다만 <b>목요일 저녁 → 금요일 부산 출장 → 토요일 저녁 가족모임</b>으로 이어지는 3일이 가장 빡빡합니다. 수요일 건강검진 당일도 일정을 비워 두는 편이 안전합니다.
+<h4>일정표</h4><table><tr><th>날짜</th><th>시간</th><th>일정</th><th>비고</th></tr>
+<tr><td>월(19일)</td><td>오전 10:00</td><td>업무회의</td><td>주 초반이라 여유 있음</td></tr>
+<tr><td>화(20일)</td><td>오후 2:00</td><td>거래처 미팅</td><td>오전 시간 활용 가능</td></tr>
+<tr><td>수(21일)</td><td>오전 ~9:00 도착</td><td>S병원 건강검진</td><td>전날 밤부터 금식 필요</td></tr>
+<tr><td>목(22일)</td><td>저녁 6:00</td><td>동창 모임</td><td>귀가가 늦어질 수 있음</td></tr>
+<tr><td>금(23일)</td><td>종일</td><td>부산 출장</td><td>출발·복귀 시각 미정</td></tr>
+<tr><td>토(24일)</td><td>저녁 5:00</td><td>가족저녁모임</td><td>금요일 복귀 상황에 따라 컨디션 영향</td></tr></table>
+<div class="blk" id="tTight"><h4>겹치거나 무리한 부분</h4><ol>
+<li><b>목요일 저녁 → 금요일 출장 (가장 주의)</b><br>모임이 길어지면 다음 날 이른 출발이 부담됩니다. 금요일 출발이 이른 편이라면 모임을 일찍 마무리하거나 전날 짐을 미리 싸 두세요.</li>
+<li><b>수요일 검진 당일</b><br>금식 후 검진이라 오전 이후 컨디션이 떨어질 수 있습니다. 오후는 비워 두세요.</li>
+<li><b>금요일 출장 → 토요일 가족모임</b><br>복귀가 금요일 밤 늦으면 토요일 모임까지 휴식이 짧습니다.</li>
+<li><b>화요일 거래처 미팅</b><br>시간은 충분합니다. 장소와 이동 시간만 확인하세요.</li></ol></div>
+<div class="blk" id="tNeed"><h4>확인이 필요한 정보</h4><ul>
+<li>부산 출장의 출발·복귀 시각, 이동 수단</li><li>동창 모임 장소, 예상 종료 시각</li><li>거래처 미팅 장소</li></ul></div>`;
+const A2=`<h4>수정 일정표</h4><table><tr><th>날짜</th><th>시간</th><th>일정</th><th>점검 의견</th></tr>
+<tr><td>월(19일)</td><td>10:00</td><td>업무회의</td><td>특이사항 없음</td></tr>
+<tr><td>화(20일)</td><td>14:00</td><td>거래처 미팅 (강남, 대중교통)</td><td>지하철 우선, 약속 30분 전 도착 권장</td></tr>
+<tr><td>수(21일)</td><td>~09:00 도착</td><td>S병원 건강검진</td><td>금식, 오후는 비워 둘 것</td></tr>
+<tr><td>목(22일)</td><td>18:00~22:00</td><td>동창 모임</td><td>22시 귀가는 현실적으로 빠듯함</td></tr>
+<tr><td>금(23일)</td><td>07:00 비행기</td><td>부산 출장 (1박)</td><td>새벽 기상 필요</td></tr>
+<tr><td>토(24일)</td><td>09:00 서울 도착</td><td>부산 → 서울 복귀</td><td>17:00 가족모임까지 약 8시간 여유</td></tr>
+<tr><td>토(24일)</td><td>17:00</td><td>가족저녁모임</td><td>복귀 후 휴식 후 참석 가능</td></tr></table>
+<div class="blk" id="tCheck"><h4>주요 점검사항</h4><ol>
+<li><b>목요일 모임과 금요일 새벽 비행기 (가장 중요)</b><ul>
+<li>오전 7시 국내선이면 출발 1시간 전 도착 기준으로 <b>오전 6시 공항 도착</b>이 필요합니다.</li>
+<li>집에서 공항까지 약 1시간이면 <b>오전 4시 30분~5시 기상</b>입니다. 22시 귀가 후 취침하면 수면은 6시간 안팎입니다.</li>
+<li>제안: 모임 시작 때 "9시 전후로 일어나겠다"고 미리 양해를 구하고, 짐은 미리 싸 두세요.</li></ul></li>
+<li><b>화요일 강남 미팅</b><ul><li>대중교통은 정체 영향이 적어 적절한 선택입니다.</li>
+<li>출발 시각 = 14시에서 (이동 시간 + 환승 여유 10분 + 도착 후 여유 20~30분)을 뺀 시각. 이동이 1시간이면 12시 30분 전후 출발입니다.</li></ul></li>
+<li><b>수요일 검진</b><ul><li>목요일 모임에 영향이 없도록 검진 후 식사와 휴식 시간을 확보하세요.</li></ul></li>
+<li><b>24일(토) 복귀</b><ul><li>부산에서 서울 도착이 오전 9시이므로 오전 중 이른 비행기가 됩니다. 토요일 아침도 일찍 시작하게 되니, 금요일 밤은 업무 후 일찍 쉬시는 것이 좋습니다.</li></ul></li></ol></div>`;
+const SAMPLE="다음 주 일정을 정리해 줘. 월요일 오전에 회의가 있고, 수요일 저녁에 친구 모임이 있고, 금요일에는 병원 가는 날이야. 요일별 표로 정리하고, 겹치거나 무리한 부분이 있으면 알려줘. 더 알아야 할 게 있으면 나한테 물어봐 줘.";
 
-function menuItem(n){for(const k in MENU){const m=MENU[k].find(x=>x[0]===n);if(m)return {name:m[0],emoji:m[1],price:m[2]}}return {name:'김밥',emoji:'🍙',price:4000}}
-function reset(){S={item:menuItem('김밥'),screen:'start',type:null,tab:'식사',modal:false,spicy:null,cheese:false,cart:[],cardIn:false};clearTimeout(T)}
-function withCart(){S.cart=[{name:'김밥',emoji:'🍙',price:4000,qty:1,opt:'기본'}]}
-const total=()=>S.cart.reduce((a,c)=>a+c.price*c.qty,0);
-
-/* 각 단계는 목표를 모두 마치면 자동으로 다음 단계로 넘어갑니다 */
 const STEPS=[
- {t:'키오스크 화면을 손가락으로 한 번 가볍게 눌러 주문을 시작해 주세요.',
-  c:'화면은 세게 누를 필요 없이 살짝 한 번만 누르면 됩니다. 여러 번 누르면 다른 버튼이 눌릴 수 있습니다.',
-  tg:['start'],setup(){reset()}},
- {t:'화면에서 먹고 가기(매장) 또는 포장을 골라 눌러 주세요.',
-  c:'이 선택에 따라 그릇과 가격이 달라질 수 있으니, 식사 방법에 맞게 정확히 골라야 합니다. 잘못 눌렀다면 화면 위쪽의 처음으로 또는 뒤로 버튼을 누르시면 됩니다.',
-  tg:['dine'],setup(){reset();S.screen='type'}},
- {t:'화면에서 먹고 싶은 메뉴 사진을 눌러 주세요.',
-  c:'메뉴가 여러 종류로 나뉘어 있으면 화면 위쪽(또는 옆)의 분류 탭(예: 식사, 사이드, 음료)을 눌러야 다른 메뉴가 보입니다. 원하는 메뉴가 안 보이면 이 탭부터 확인해 보세요.',
-  tg:['m-김밥'],setup(){reset();S.screen='menu';S.type='먹고 가기'}},
- {t:'메뉴를 누르면 나오는 옵션 창이 보입니다. 옵션은 고르지 않아도 되고, 담기(또는 선택 완료) 버튼을 눌러 주세요.',
-  c:'옵션을 고르지 않고 넘어가면 기본값으로 주문됩니다. 또한 담기를 누르기 전에는 장바구니에 들어가지 않으니, 버튼을 꼭 눌러야 합니다.',
-  tg:['addcart'],setup(){reset();S.screen='menu';S.type='먹고 가기';S.modal=true}},
- {t:'화면 아래쪽의 주문 내역(장바구니)을 눌러 주세요.',
-  c:'장바구니에 담아도 바로 결제되는 것이 아닙니다. 주문 내역을 눌러야 고른 메뉴와 수량을 확인하는 화면으로 넘어갑니다. 메뉴를 더 담고 싶으면 메뉴를 한 번 더 누르세요.',
-  tg:['cartbar'],setup(){reset();S.screen='menu';S.type='먹고 가기';withCart()}},
- {t:'메뉴와 수량이 맞는지 확인하고, 맞으면 결제하기를 누른 뒤 결제 방법에서 카드를 골라 주세요.',
-  c:'수량이 틀렸다면 메뉴 옆의 + / - 버튼으로 고치고, 잘못 담은 메뉴는 X 버튼으로 뺄 수 있습니다. 결제 방법을 고르는 단계에서는 아직 돈이 나가는 것이 아니니 당황하지 않으셔도 됩니다.',
-  tg:['pay','card'],setup(){reset();S.screen='cart';S.type='먹고 가기';withCart()}},
- {t:'화면 안내에 따라 카드를 투입구에 끝까지 꽂아 주세요. (간편결제를 고르셨다면 QR코드나 바코드를 화면 아래 인식부에 대 주세요.)',
-  c:'카드는 IC칩이 있는 면을 위로(또는 안내 그림 방향으로) 넣어야 하며, 결제가 끝날 때까지 뽑지 말고 그대로 두셔야 합니다. "카드를 빼 주세요"라는 안내가 나올 때 뽑으시면 됩니다.',
-  tg:['slot','slot-out'],setup(){reset();S.screen='cardwait';S.type='먹고 가기';withCart()}},
- {t:'결제가 끝나면 주문번호표(영수증)가 나옵니다. 번호표를 꼭 챙겨 주세요. 카드도 잊지 말고 뽑아 주세요.',
-  c:'주문번호는 음식을 받을 때 호출되는 번호이니, 번호표를 받아 두었다가 화면이나 호출 방송에서 내 번호가 나올 때까지 기다리시면 됩니다. 영수증 출력 여부를 묻는 화면이 나오면, 필요하신 경우에만 출력을 눌러 주세요.',
-  tg:['ticket'],setup(){reset();S.screen='ticket';S.type='먹고 가기';withCart()}}
+ {t:"일정을 순서나 형식 없이, 머릿속에 있는 대로 말하듯 적어서 ‘보내기’를 눌러 주세요.",c:"맞춤법이나 순서는 신경 쓰지 않아도 됩니다. 아래 글은 예시이고, 연습실에서는 ‘보내기’만 누르시면 됩니다.",tg:"send"},
+ {t:"AI가 일정을 표로 정리해 줬어요. 노랗게 반짝이는 ‘겹치거나 무리한 부분’을 눌러 보세요.",c:"AI는 표를 만들 뿐 아니라, 빠듯한 날도 먼저 짚어 줍니다. 목요일 저녁 → 금요일 출장 → 토요일 모임이 가장 빡빡하다고 알려줬어요.",tg:"tTight"},
+ {t:"AI가 ‘확인이 필요한 정보’를 되물었어요. 반짝이는 곳을 눌러 보세요.",c:"AI가 되물어 오는 것은 대화가 잘 되고 있다는 신호입니다. 이 질문에 답해 줄수록 결과가 훨씬 좋아져요.",tg:"tNeed"},
+ {t:"AI가 물어본 것에 구체적으로 답해서 ‘보내기’를 눌러 주세요.",c:"시각, 장소, 이동 수단을 구체적으로 알려주면 좋습니다. 한 번에 다 못 써도 괜찮고, 아는 만큼만 답하세요.",tg:"send"},
+ {t:"AI가 출발 시각과 기상 시각까지 거꾸로 계산해 줬어요. ‘주요 점검사항’을 눌러 보세요.",c:"처음 답보다 훨씬 구체적이지요? 한 번에 끝내지 않고 2~3번 주고받으면서 고쳐 가는 것이 요령입니다.",tg:"tCheck"},
+ {t:"이제 내 일정으로 해 볼 차례입니다. 초록색 버튼을 눌러 주세요.",c:"처음 질문에서 AI가 틀린 말을 하면 \"이 부분은 틀렸어, 다시 해줘\"라고 말해도 됩니다.",tg:"final"}
 ];
+const LAST=STEPS.length-1;
+const $=id=>document.getElementById(id);
+let mode="try",idx=0,busy=false,tts=true,playing=false,timer=null,spd=1;
+const chat=$("chat"),inp=$("inp"),send=$("send");
 
-/* '건너뛰기'로 넘어갈 때는 담은 주문을 지우지 않고 이어서 진행 */
-const SOFT=[
- ()=>reset(),
- ()=>{S.screen='type';S.modal=false},
- ()=>{S.screen='menu';S.modal=false;if(!S.type)S.type='먹고 가기'},
- ()=>{S.screen='menu';if(!S.type)S.type='먹고 가기';S.modal=true;S.spicy=null},
- ()=>{S.screen='menu';if(!S.type)S.type='먹고 가기';if(S.modal&&!S.cart.length)ACT.addcart();S.modal=false;if(!S.cart.length)withCart()},
- ()=>{S.screen='cart';S.modal=false;if(!S.cart.length)withCart()},
- ()=>{S.screen='cardwait';S.cardIn=false;clearTimeout(T)},
- ()=>{S.screen='ticket';S.cardIn=false;clearTimeout(T)}
-];
+function bub(cls,html){const d=document.createElement("div");d.className="m "+cls;d.innerHTML=html;chat.appendChild(d);return d}
+function setInp(t){inp.textContent=t||"여기에 말하듯 적어서 보냅니다";inp.className=t?"":"empty"}
+function mark(i,on){const e=$(i);if(e)e.classList.remove("hl","done"),on&&e.classList.add(on)}
+function scrollTo(el){if(!el)return;chat.scrollTop=Math.max(0,el.offsetTop-chat.offsetTop-20)}
+function scrollEnd(){chat.scrollTop=chat.scrollHeight}
 
-const ACT={
- start(){S.screen='type'},
- dine(){S.type='먹고 가기';S.screen='menu'},
- take(){S.type='포장';S.screen='menu'},
- 'm-김밥'(){S.modal=true},
- addcart(){S.cart.push({name:S.item.name,emoji:S.item.emoji,price:S.item.price+(S.cheese?500:0),qty:1,opt:(S.spicy||'기본')+(S.cheese?' · 치즈':'')});S.modal=false;S.spicy=null;S.cheese=false},
- cartbar(){S.screen='cart'},
- pay(){S.screen='pay'},
- card(){S.screen='cardwait'},
- slot(){S.cardIn=true;S.screen='processing';clearTimeout(T);T=setTimeout(()=>{S.screen='remove';update()},2400)},
- 'slot-out'(){S.cardIn=false;S.screen='ticket'},
- ticket(){S.screen='done'}
-};
-function freeAct(id){
-  if(id.startsWith('tab-')){S.tab=id.slice(4);return true}
-  if(id==='opt-순한맛'||id==='opt-보통맛'||id==='opt-매운맛'){S.spicy=id.slice(4);return true}
-  if(id==='opt-cheese'){S.cheese=!S.cheese;return true}
-  if(id==='cancel'){S.modal=false;return true}
-  if(id==='addcart'&&S.modal){ACT.addcart();return true}
-  if(id==='cartbar'){S.screen='cart';return true}
-  let m;
-  if(m=id.match(/^qty\+(\d+)$/)){const c=S.cart[+m[1]];if(c)c.qty++;return true}
-  if(m=id.match(/^qty-(\d+)$/)){const c=S.cart[+m[1]];if(c&&c.qty>1)c.qty--;return true}
-  if(m=id.match(/^del(\d+)$/)){S.cart.splice(+m[1],1);if(!S.cart.length)S.screen='menu';return true}
-  if(id==='more'){S.screen='menu';return true}
-  return false;
+function build(i){ // 상태를 즉시 재구성
+  chat.innerHTML="";setInp("");send.className="";
+  if(i>=1){bub("me",Q1);bub("ai",A1)}
+  if(i>=4){bub("me",Q2);bub("ai",A2)}
+  if(i===0){setInp(Q1);send.className="hl"}
+  if(i===3){setInp(Q2);send.className="hl"}
+  ["tTight","tNeed","tCheck"].forEach((k,n)=>{const need=[1,2,4][n];
+    if(i>need)mark(k,"done");else if(i===need)mark(k,"hl")});
+  if(i===5){const b=document.createElement("button");b.className="final";b.id="final";b.textContent="✍ 내 일정으로 해 보기";chat.appendChild(b)}
+  idx=i;render();
+  const tgEl=$(STEPS[i]&&STEPS[i].tg);
+  if(i===1||i===2||i===4)scrollTo(tgEl);else scrollEnd();
 }
-const curTarget=()=>STEPS[idx].tg[ti];
-
 function render(){
-  const bar=t=>`<div class="topbar"><span>분식나라 (연습용)</span><span>${t}</span></div>`;
-  let h='';
-  switch(S.screen){
-  case 'start':
-    h=bar('')+`<div class="sbody center" data-t="start"><div class="big">🍜</div><h2>주문하시려면<br>아래 버튼을 눌러 주세요</h2><div class="btn primary xl">주문 시작</div></div>`;break;
-  case 'type':
-    h=bar('식사 방법')+`<div class="sbody"><div class="msg">식사 방법을 골라 주세요</div><div class="row2"><button class="btn typebtn" data-t="dine">🍽<br>먹고 가기</button><button class="btn typebtn" data-t="take">🛍<br>포장하기</button></div></div>`;break;
-  case 'menu': {
-    const tabs=Object.keys(MENU).map(k=>`<button class="btn ${S.tab===k?'on':''}" data-t="tab-${k}">${k}</button>`).join('');
-    const items=MENU[S.tab].map(m=>`<button class="mi" data-t="m-${m[0]}"><span class="em">${m[1]}</span><b>${m[0]}</b><small>${won(m[2])}</small></button>`).join('');
-    const n=S.cart.reduce((a,c)=>a+c.qty,0);
-    const cb=n?`<div class="cartbar" data-t="cartbar"><span>🛒 주문 내역 ${n}개 · ${won(total())}</span><span>보기 ▶</span></div>`:`<div class="cartbar empty">🛒 장바구니가 비어 있어요</div>`;
-    h=bar(S.type||'')+`<div class="sbody"><div class="tabs">${tabs}</div><div class="menu">${items}</div></div>${cb}`;
-    if(S.modal){
-      const o=x=>`<button class="btn ${S.spicy===x?'on':''}" data-t="opt-${x}">${x}</button>`;
-      h+=`<div class="modal"><div class="mbox"><h3>${S.item.emoji} ${S.item.name} · ${won(S.item.price)}</h3><div class="sub">옵션은 고르지 않아도 됩니다 (선택 사항)</div><div>맵기</div><div class="opts">${o('순한맛')}${o('보통맛')}${o('매운맛')}</div><div>추가 토핑</div><div class="opts"><button class="btn ${S.cheese?'on':''}" data-t="opt-cheese">치즈 +500원</button></div><div class="row2"><button class="btn" data-t="cancel">취소</button><button class="btn primary" data-t="addcart">담기</button></div></div></div>`;
-    }
-    break;}
-  case 'cart': {
-    const rows=S.cart.map((c,i)=>`<div class="crow"><span>${c.emoji} ${c.name}<br><small>(${c.opt})</small></span><span class="qty"><button data-t="qty-${i}">−</button> ${c.qty} <button data-t="qty+${i}">+</button></span><span>${won(c.price*c.qty)}</span><button class="btn" style="padding:.2em .6em" data-t="del${i}">✕</button></div>`).join('')||'<div class="msg">비어 있어요</div>';
-    h=bar('주문 내역')+`<div class="sbody"><div class="list">${rows}<div class="total"><span>합계</span><span>${won(total())}</span></div></div><div class="row2" style="margin-top:auto"><button class="btn" data-t="more">더 담기</button><button class="btn primary" data-t="pay">결제하기</button></div></div>`;break;}
-  case 'pay':
-    h=bar('결제 방법')+`<div class="sbody"><div class="msg">결제 방법을 골라 주세요</div><button class="btn typebtn" data-t="card">💳 카드 결제</button><button class="btn typebtn" data-t="qr">📱 간편결제(QR)</button></div>`;break;
-  case 'cardwait':
-    h=bar('카드 결제')+`<div class="sbody center" style="cursor:default"><div class="big">💳</div><div class="msg">카드를 아래 투입구에<br>끝까지 꽂아 주세요</div><div class="big" style="font-size:3em">⬇</div></div>`;break;
-  case 'processing':
-    h=bar('결제 중')+`<div class="sbody center" style="cursor:default"><div class="big">⏳</div><div class="msg">결제 중입니다<br>카드를 빼지 마세요</div></div>`;break;
-  case 'remove':
-    h=bar('결제 완료')+`<div class="sbody center" style="cursor:default"><div class="big">✅</div><div class="msg">결제가 완료되었습니다<br><span style="color:var(--accent)">카드를 빼 주세요</span></div></div>`;break;
-  case 'ticket':
-    h=bar('주문 완료')+`<div class="sbody center" style="cursor:default"><div class="big">🧾</div><div class="msg">주문번호 128번<br>번호표를 받아 가세요</div></div>`;break;
-  case 'done':
-    h=bar('감사합니다')+`<div class="sbody center" style="cursor:default"><div class="big">🎉</div><div class="msg">주문이 끝났어요!<br>128번 번호가 불릴 때까지<br>기다려 주세요</div></div>`;break;
-  }
-  $('#screen').innerHTML=h;
-  $('#cardpic').className='cardpic'+(S.cardIn?' in':'');
-  $('#tkslot').innerHTML=S.screen==='ticket'?`<div class="ticket" data-t="ticket">주문번호<br>128</div>`:'';
-  const slotHit=$('#slotHit');
-  slotHit.removeAttribute('data-t');
-  if(S.screen==='cardwait')slotHit.setAttribute('data-t','slot');
-  if(S.screen==='remove')slotHit.setAttribute('data-t','slot-out');
-  highlight();
-}
-function update(){render();guideStatus()}
-function highlight(){
-  document.querySelectorAll('.hl').forEach(e=>e.classList.remove('hl'));
-  if(done)return;
-  const c=curTarget(),el=findEl(c);
-  if(el)el.classList.add('hl');
-  if(c==='dine'){const t=findEl('take');if(t)t.classList.add('hl')}
-  if(c==='m-김밥')document.querySelectorAll('.mi').forEach(e=>e.classList.add('hl'));
-}
-function findEl(id){return document.querySelector(`[data-t="${id}"]`)}
-
-function finishTarget(){
-  ti++;
-  if(ti>=STEPS[idx].tg.length)done=true;
-  if(done&&mode==='try'&&idx<LAST){gotoStep(idx+1,true);return}   // 자동으로 다음 단계
-  update();
-}
-function runTarget(){ACT[curTarget()]();finishTarget()}
-function hint(msg){
-  const t=$('#toast');t.textContent=msg||'반짝이는 곳을 눌러 보세요 ✨';t.classList.add('show');
-  clearTimeout(hint.h);hint.h=setTimeout(()=>t.classList.remove('show'),1800);
-}
-$('#kiosk').addEventListener('click',e=>{
-  if(mode!=='try')return;
-  const el=e.target.closest('[data-t]');if(!el)return;
-  const id=el.getAttribute('data-t'),cur=curTarget();
-  if(!done){
-    if(id===cur){runTarget();return}
-    if(cur==='dine'&&id==='take'){ACT.take();finishTarget();return}
-    if(cur==='m-김밥'&&id.startsWith('m-')){S.item=menuItem(id.slice(2));ACT['m-김밥']();finishTarget();return}
-  }
-  if(id.startsWith('m-')&&!S.modal&&S.screen==='menu'&&idx>=2&&idx<=4){S.item=menuItem(id.slice(2));S.modal=true;update();return}
-  if(freeAct(id)){update();return}
-  hint(done?'모두 끝났어요! 아래 "처음부터"를 눌러 다시 연습해 보세요.':null);
-});
-
-function guideStatus(){
-  const s=$('#status'),nx=$('#bNext');
-  if(mode==='watch'){s.className='status';s.textContent=playing?'▶ 재생 중… 천천히 따라 보세요':'▶ 재생 버튼을 누르면 자동으로 보여 드립니다';nx.textContent='건너뛰기 ▶';nx.classList.remove('go','glow');return}
-  if(done&&idx===LAST){
-    s.className='status ok';s.textContent='🎉 키오스크 주문이 모두 끝났어요! 정말 잘하셨어요.';
-    nx.textContent='↺ 처음부터';nx.classList.add('go','glow');
+  const done=idx>LAST;
+  $("gb").textContent=done?"완료":(idx+1)+"단계 / "+STEPS.length;
+  $("gp").innerHTML=STEPS.map((_,n)=>`<i class="${n<=idx?"on":""}"></i>`).join("");
+  if(done){
+    $("hint").textContent="";$("gt").textContent="🎉 AI 대화 연습이 모두 끝났어요! 아래 예시를 복사해서 AI에게 내 일정을 보내 보세요.";
+    $("gc").innerHTML=`<div class="copy" id="sample">${SAMPLE}</div><button id="bCopy" class="final" style="animation:none">📋 예시 문장 복사하기</button>`;
+    $("bCopy").onclick=()=>{try{navigator.clipboard.writeText(SAMPLE);$("bCopy").textContent="✅ 복사됐어요! AI 앱에 붙여넣기 하세요"}catch(e){$("bCopy").textContent="길게 눌러서 복사해 주세요"}};
+    chat.innerHTML="";
+    bub("ai","🎉 수고하셨습니다! 이제 내 일정을 AI에게 말하듯 보내 보세요.<div class='copy'>"+SAMPLE+"</div><button class='final' id='cCopy' style='animation:none'>📋 이 문장 복사하기</button><div style='font-size:.85em;color:#666'>복사한 뒤 휴대폰의 AI 앱에 붙여넣고, 일정은 내 것으로 바꿔서 보내세요.</div>");
+    $("cCopy").onclick=()=>{try{navigator.clipboard.writeText(SAMPLE);$("cCopy").textContent="✅ 복사됐어요! AI 앱에 붙여넣기 하세요"}catch(e){$("cCopy").textContent="문장을 길게 눌러서 복사해 주세요"}};
   }else{
-    s.className='status';s.textContent='👆 화면의 반짝이는 곳을 눌러 보세요';
-    nx.textContent='건너뛰기 ▶';nx.classList.remove('go','glow');
+    $("gt").textContent=STEPS[idx].t;$("hint").textContent=(idx+1)+"단계 · "+STEPS[idx].t;$("gc").innerHTML="<b>⚠ 헷갈리는 점</b> "+STEPS[idx].c;
   }
+  $("bPrev").disabled=idx===0;
+  speak();
 }
-function gotoStep(i,soft){
-  idx=Math.max(0,Math.min(LAST,i));ti=0;done=false;
-  clearTimeout(T);
-  if(soft)SOFT[idx]();else STEPS[idx].setup();
-  $('#sn').textContent=`${idx+1}단계 / ${STEPS.length}`;
-  $('#gt').textContent=STEPS[idx].t;
-  $('#gc').textContent=STEPS[idx].c;
-  $('#dots').innerHTML=STEPS.map((_,k)=>`<i class="${k===idx?'on':k<idx?'past':''}"></i>`).join('');
-  update();
-  if($('#cTts').checked)speak(`${idx+1}단계. ${STEPS[idx].t} 헷갈리는 점. ${STEPS[idx].c}`);
-}
-function speak(txt){
-  try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(txt);u.lang='ko-KR';u.rate=.85;speechSynthesis.speak(u)}catch(e){}
-}
+function speak(){try{speechSynthesis.cancel();if(tts&&"speechSynthesis" in window){const u=new SpeechSynthesisUtterance($("gt").textContent);u.lang="ko-KR";u.rate=.9;speechSynthesis.speak(u)}}catch(e){}}
 
-/* 자동 재생 (따라보기) */
-const sleep=ms=>new Promise(r=>setTimeout(r,ms*speed));
-async function waitEl(id,my){
-  for(let k=0;k<80;k++){if(my!==run)return null;const el=findEl(id);if(el)return el;await new Promise(r=>setTimeout(r,100))}
-  return null;
+function act(tg){ // 사용자가 누른 것 처리
+  if(busy||idx>LAST)return;
+  if(tg!==STEPS[idx].tg)return;
+  if(tg==="send"){
+    busy=true;send.className="";
+    bub("me",idx===0?Q1:Q2);setInp("");scrollEnd();
+    const ty=bub("ai typing","<span></span><span></span><span></span>");scrollEnd();
+    setTimeout(()=>{ty.remove();busy=false;build(idx+1)},1600/spd);
+  }else if(tg==="final"){idx=LAST+1;render()}
+  else{build(idx+1)}
 }
-function moveFinger(el){
-  const f=$('#finger'),r=el.getBoundingClientRect();
-  f.style.display='block';
-  f.style.setProperty('--ft',(1*speed)+'s');
-  f.style.transform=`translate(${r.left+r.width/2-26}px,${r.top+r.height/2-6}px)`;
-}
-function ripple(el){
-  const r=el.getBoundingClientRect(),d=document.createElement('div');
-  d.className='ripple';d.style.left=(r.left+r.width/2)+'px';d.style.top=(r.top+r.height/2)+'px';
-  document.body.appendChild(d);setTimeout(()=>d.remove(),700);
-}
-async function autoPlay(from){
-  const my=++run;playing=true;setPlayBtn();
-  $('#finger').style.display='block';$('#finger').style.transform='translate(60vw,100vh)';
-  for(let i=from;i<=LAST;i++){
-    if(my!==run)return;
-    gotoStep(i);guideStatus();
-    await sleep(4200);
-    for(let j=0;j<STEPS[i].tg.length;j++){
-      if(my!==run)return;
-      const el=await waitEl(STEPS[i].tg[j],my);if(!el)return;
-      await sleep(600);
-      moveFinger(el);await sleep(1200);
-      if(my!==run)return;
-      ripple(el);runTarget();
-      await sleep(1500);
-    }
-    await sleep(4500);
-  }
-  if(my===run){playing=false;setPlayBtn();guideStatus();$('#finger').style.display='none'}
-}
-function stopPlay(){run++;playing=false;setPlayBtn();$('#finger').style.display='none'}
-function setPlayBtn(){$('#bPlay').textContent=playing?'⏸ 멈춤':'▶ 재생'}
+send.onclick=()=>{if(mode==="try")act("send")};
+chat.addEventListener("click",e=>{if(mode!=="try")return;
+  const b=e.target.closest("#tTight,#tNeed,#tCheck,#final");if(b)act(b.id)});
 
-function setMode(m){
-  mode=m;stopPlay();
-  $('#kiosk').classList.toggle('watch',m==='watch');
-  $('#mWatch').classList.toggle('on',m==='watch');
-  $('#mTry').classList.toggle('on',m==='try');
-  $('#bPlay').style.display=m==='watch'?'':'none';
-  gotoStep(0);
+// 따라보기(자동 재생)
+const fg=$("fg");
+function fingerTo(el,cb){
+  const r=el.getBoundingClientRect();
+  fg.style.display="block";fg.style.left=(r.left+r.width/2-16)+"px";fg.style.top=(r.top+Math.min(r.height/2,40)-16)+"px";
+  setTimeout(()=>{fg.classList.add("tap");setTimeout(()=>{fg.classList.remove("tap");cb()},250)},900/spd);
 }
-$('#mWatch').onclick=()=>setMode('watch');
-$('#mTry').onclick=()=>setMode('try');
-$('#bPrev').onclick=()=>{stopPlay();gotoStep(idx-1)};
-$('#bRedo').onclick=()=>{stopPlay();gotoStep(idx)};
-$('#bNext').onclick=()=>{stopPlay();if(idx===LAST&&done)gotoStep(0);else gotoStep(idx+1,true)};
-$('#bPlay').onclick=()=>{if(playing)stopPlay();else autoPlay(idx)};
-$('#sSpeed').onchange=e=>{speed=parseFloat(e.target.value)};
+function autoStep(){
+  if(!playing)return;
+  if(idx>LAST){playing=false;fg.style.display="none";$("bPlay").textContent="▶ 재생";return}
+  const wait=(speakLen()*70+1800)/spd;
+  timer=setTimeout(()=>{
+    const tg=STEPS[idx].tg,el=$(tg);if(!el){playing=false;return}
+    if(tg==="tTight"||tg==="tNeed"||tg==="tCheck")scrollTo(el);
+    fingerTo(el,()=>{act(tg);timer=setTimeout(autoStep,tg==="send"?2200/spd:200)});
+  },wait);
+}
+function speakLen(){return($("gt").textContent+$("gc").textContent).length*0.5}
+function play(){if(playing){playing=false;clearTimeout(timer);$("bPlay").textContent="▶ 재생";fg.style.display="none";return}
+  if(idx>LAST)build(0);playing=true;$("bPlay").textContent="⏸ 멈춤";autoStep()}
 
-/* 주소 옵션: ?mode=watch&autoplay=1&speed=1.6 */
-const q=new URLSearchParams(location.search);
-if(q.get('speed')){speed=parseFloat(q.get('speed'))||1;$('#sSpeed').value=speed>1?'1.6':'1'}
-if(q.get('tts')==='1')$('#cTts').checked=true;
-if(q.get('mode')==='watch'){setMode('watch');if(q.get('autoplay')==='1')setTimeout(()=>autoPlay(0),800)}
-else setMode('try');
+function setMode(m){mode=m;playing=false;clearTimeout(timer);fg.style.display="none";
+  $("mWatch").classList.toggle("on",m==="watch");$("mTry").classList.toggle("on",m==="try");
+  $("bPlay").style.display=m==="watch"?"":"none";$("bPlay").textContent="▶ 재생";build(0)}
+$("mWatch").onclick=()=>setMode("watch");$("mTry").onclick=()=>setMode("try");
+$("bPrev").onclick=()=>{playing=false;clearTimeout(timer);build(Math.max(0,Math.min(idx,LAST+1)-1))};
+$("bRe").onclick=()=>{playing=false;clearTimeout(timer);fg.style.display="none";build(0)};
+$("bPlay").onclick=play;
+$("spd").onchange=e=>{spd=parseFloat(e.target.value)};
+$("bTts").onclick=()=>{tts=!tts;$("bTts").textContent=tts?"🔊 읽어주기 끄기":"🔇 읽어주기 켜기";if(!tts)try{speechSynthesis.cancel()}catch(e){}else speak()};
+
+(function init(){
+  const p=new URLSearchParams(location.search);
+  if(p.get("tts")!=="1"){tts=false;$("bTts").textContent="🔇 읽어주기 켜기"}
+  if(p.get("speed")){spd=parseFloat(p.get("speed"))||1;const s=$("spd");[...s.options].forEach(o=>{if(parseFloat(o.value)===spd)s.value=o.value})}
+  if(p.get("mode")==="watch"){setMode("watch");if(p.get("autoplay")==="1")setTimeout(play,800)}else build(0);
+})();
 </script>
 </body>
 </html>
